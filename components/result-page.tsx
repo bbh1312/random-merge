@@ -67,96 +67,80 @@ export default function ResultPage({
 
       {!isLoading && (
         <div
-          className={`max-w-md w-full transition-all duration-700 ${
+          className={`w-full max-w-[480px] min-w-[320px] flex-1 flex flex-col transition-all duration-700 ${
             showContent ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
           }`}
         >
-          <div className="text-center mb-8 pt-8 animate-bounce-slow">
-            <h1 className="text-4xl font-bold text-foreground mb-2">축하합니다!</h1>
-            <p className="text-muted-foreground">새로운 캐릭터가 생겼어요!</p>
+          <div className="text-center mb-4">
+            <h1 className="text-3xl font-bold text-foreground mb-1">축하합니다!</h1>
+            <p className="text-sm text-muted-foreground">새로운 캐릭터가 생겼어요!</p>
           </div>
 
-          <Card className="p-8 bg-white border-4 border-primary/30 shadow-xl animate-scale-in">
-            <div className="mb-6 perspective">
-              <div className="animate-flip-in">
-                <img
-                  src={character.imageUrl || '/placeholder.svg?height=300&width=300&query=cute character'}
-                  alt={character.name}
-                  className="w-full rounded-xl shadow-md hover:shadow-lg transition-all duration-300 animate-character-float hover:scale-105 cursor-pointer"
-                />
-              </div>
+          <Card className="flex flex-col flex-1 p-4 bg-white border-4 border-primary/30 shadow-xl">
+            <div className="mb-4">
+              <img
+                src={character.imageUrl || '/placeholder.svg?height=280&width=280&query=cute character'}
+                alt={character.name}
+                className="w-full rounded-xl shadow-md"
+              />
             </div>
 
-            {/* Character Info */}
-            <div className="text-center mb-6">
-              <div className="flex items-center justify-center gap-3 mb-2">
-                <h2 className="text-3xl font-bold text-foreground">
-                  {character.name}
-                </h2>
+            <div className="text-center mb-4">
+              <div className="flex items-center justify-center gap-2 mb-1">
+                <h2 className="text-2xl font-bold text-foreground">{character.name}</h2>
                 {character.premium && (
-                  <div className="flex items-center gap-1 bg-secondary text-secondary-foreground px-3 py-1 rounded-full">
-                    <Star className="w-4 h-4 fill-current" />
-                    <span className="text-xs font-bold">프리미엄</span>
+                  <div className="flex items-center gap-1 bg-secondary text-secondary-foreground px-2 py-1 rounded-full text-xs font-bold">
+                    <Star className="w-3 h-3 fill-current" />
+                    프리미엄
                   </div>
                 )}
               </div>
-              <p className="text-sm text-muted-foreground mb-4">
-                {character.parts.join(' × ')}
-              </p>
-              <p className="text-foreground leading-relaxed">
-                {character.description}
-              </p>
+              <p className="text-xs text-muted-foreground mb-2">{character.parts.join(' × ')}</p>
+              <p className="text-sm text-foreground leading-relaxed">{character.description}</p>
             </div>
 
-            {/* Stats */}
-            <div className="grid grid-cols-3 gap-3 mb-8 py-4 border-y border-border">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-primary">🎨</div>
-                <p className="text-xs text-muted-foreground">생성됨</p>
+            <div className="grid grid-cols-3 gap-2 mb-4 py-3 border-y border-border text-center text-xs">
+              <div>
+                <div className="text-xl">🎨</div>
+                <p className="text-muted-foreground">생성됨</p>
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-accent">⭐</div>
-                <p className="text-xs text-muted-foreground">등급: S</p>
+              <div>
+                <div className="text-xl">⭐</div>
+                <p className="text-muted-foreground">등급 S</p>
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-secondary">💫</div>
-                <p className="text-xs text-muted-foreground">독창성</p>
+              <div>
+                <div className="text-xl">💫</div>
+                <p className="text-muted-foreground">독창성</p>
               </div>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-2 mt-auto">
               <Button
                 onClick={onSaveToCollection}
-                className="w-full py-6 bg-gradient-to-r from-primary to-orange-500 text-white font-bold rounded-lg hover:shadow-lg transform hover:scale-105 transition-transform duration-200 animate-slide-up"
-                style={{ animationDelay: '0.1s' }}
+                className="w-full py-4 bg-gradient-to-r from-primary to-orange-500 text-white font-bold rounded-lg"
               >
-                <Heart className="w-5 h-5 mr-2 fill-current" />
+                <Heart className="w-4 h-4 mr-2 fill-current" />
                 도감에 저장
               </Button>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2">
                 <Button
                   onClick={onPullAgain}
                   variant="outline"
-                  className="py-6 font-bold rounded-lg border-2 transform hover:scale-105 transition-transform duration-200 animate-slide-up"
-                  style={{ animationDelay: '0.2s' }}
+                  className="py-4 text-sm font-bold rounded-lg border-2"
                 >
                   한 번 더 뽑기
                 </Button>
                 <Button
                   onClick={onViewCollection}
                   variant="outline"
-                  className="py-6 font-bold rounded-lg border-2 transform hover:scale-105 transition-transform duration-200 animate-slide-up"
-                  style={{ animationDelay: '0.3s' }}
+                  className="py-4 text-sm font-bold rounded-lg border-2"
                 >
                   도감 보기
                 </Button>
               </div>
 
-              <button
-                className="w-full py-3 text-foreground/60 hover:text-foreground transition-colors flex items-center justify-center gap-2 animate-slide-up"
-                style={{ animationDelay: '0.4s' }}
-              >
+              <button className="w-full py-3 text-xs text-foreground/60 hover:text-foreground transition-colors flex items-center justify-center gap-2">
                 <Share2 className="w-4 h-4" />
                 공유하기
               </button>
