@@ -71,6 +71,7 @@ export default function Page() {
           onSignup={() => setCurrentPage('signup')}
           user={user}
           recentCharacter={collection[collection.length - 1] || null}
+          collectionCount={collection.length}
         />
       )}
       {currentPage === 'signup' && (

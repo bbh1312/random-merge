@@ -77,9 +77,8 @@ export default function PartsSelectionPage({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-50 via-blue-50 to-pink-50 p-4 flex flex-col">
-      {/* Header */}
-      <div className="max-w-2xl mx-auto w-full mb-6">
+    <div className="min-h-[calc(100vh-120px)] bg-gradient-to-b from-purple-50 via-blue-50 to-pink-50 p-4 flex flex-col items-center">
+      <div className="w-full max-w-2xl flex-1 flex flex-col">
         <div className="flex items-center justify-between mb-6">
           <button
             onClick={onBack}
@@ -103,9 +102,7 @@ export default function PartsSelectionPage({
         </p>
       </div>
 
-      {/* Selected Parts Preview Bar */}
-      <div className="max-w-2xl mx-auto w-full mb-6">
-        <div className="bg-white/60 backdrop-blur p-4 rounded-xl border border-purple-100 flex flex-wrap items-center gap-3">
+        <div className="bg-white/60 backdrop-blur p-4 rounded-xl border border-purple-100 flex flex-wrap items-center gap-3 mb-6">
           <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">선택된 파츠:</span>
           {selectedParts.length > 0 ? (
             <div className="flex gap-2 flex-wrap">
@@ -127,9 +124,7 @@ export default function PartsSelectionPage({
         </div>
       </div>
 
-      {/* Main Content Area */}
-      <div className="max-w-2xl mx-auto w-full flex-1">
-        <div className="bg-white rounded-3xl p-6 shadow-sm border border-purple-50">
+        <div className="bg-white rounded-3xl p-6 shadow-sm border border-purple-50 flex-1">
          <div className="flex gap-3 overflow-x-auto pb-4 mb-4">
             {categoryEntries.map(([key, category]) => {
               const isActive = key === activeCategory;
