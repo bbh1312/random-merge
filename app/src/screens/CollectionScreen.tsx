@@ -5,6 +5,7 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useCollection } from "../context/CollectionContext";
 import { getDeviceId } from "../utils/deviceId";
 import { claimCollectionSlots } from "../services/api";
+import { BannerAd } from "../components/BannerAd";
 import type { RootStackParamList } from "../../App";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Collection">;
@@ -60,6 +61,7 @@ export const CollectionScreen: React.FC<Props> = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>내 도감</Text>
+      <BannerAd />
       <View style={styles.slotBar}>
         {loadingSlots ? (
           <ActivityIndicator size="small" />

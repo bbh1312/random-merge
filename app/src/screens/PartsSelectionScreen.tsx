@@ -6,6 +6,8 @@ import { generateCharacter } from "../services/api";
 import { useCollection } from "../context/CollectionContext";
 import { getDeviceId } from "../utils/deviceId";
 import { getAdAccessState, grantAdAccess, hasValidAdAccess } from "../utils/adAccess";
+import { BannerAd } from "../components/BannerAd";
+import { CategoryKey, DEFAULT_UNLOCK, getUnlockedCounts, incrementUnlock } from "../utils/unlockParts";
 import type { RootStackParamList } from "../../App";
 
 type Props = NativeStackScreenProps<RootStackParamList, "PartsSelection">;
@@ -19,7 +21,23 @@ export const PartsSelectionScreen: React.FC<Props> = ({ route, navigation }) => 
   const [adExpiresAt, setAdExpiresAt] = useState<number | null>(null);
   const [adProcessing, setAdProcessing] = useState(false);
   const [adToken, setAdToken] = useState<string | null>(null);
+  const [deviceId, setDeviceId] = useState<string | null>(null);
+  const [unlocked, setUnlocked] = useState<Record<CategoryKey, number> | null>(null);
+  const [unlockingCat, setUnlockingCat] = useState<CategoryKey | null>(null);
   const { addCharacter } = useCollection();
+
+  const totals: Record<CategoryKey, number> = useMemo(
+    () => ({
+      ANIMALS: ANIMALS.length,
+      INSECTS: INSECTS.length,
+      FRUITS: FRUITS.length,
+      VEGGIES: VEGGIES.length,
+      OBJECTS: OBJECTS.length,
+      NATURAL: NATURAL.length,
+      FANTASY: FANTASY.length,
+    }),
+    []
+  );
 
   const maxParts = hasValidAdAccess(adExpiresAt) ? 3 : 2;
   const canSubmit = selected.length >= MIN_PARTS && selected.length <= maxParts;
@@ -53,9 +71,10 @@ export const PartsSelectionScreen: React.FC<Props> = ({ route, navigation }) => 
     }
     try {
       setLoading(true);
-      const deviceId = await getDeviceId();
-      const character = await generateCharacter(selected, { premium: isPremium, deviceId, adToken: adToken ?? undefined });
-      await addCharacter(character, selected, deviceId);
+      const id = deviceId ?? (await getDeviceId());
+      setDeviceId(id);
+      const character = await generateCharacter(selected, { premium: isPremium, deviceId: id, adToken: adToken ?? undefined });
+      await addCharacter(character, selected, id);
       navigation.navigate("Result");
     } catch (err: any) {
       console.warn(err);
@@ -101,6 +120,19 @@ export const PartsSelectionScreen: React.FC<Props> = ({ route, navigation }) => 
   }, []);
 
   useEffect(() => {
+    getDeviceId()
+      .then((id) => {
+        setDeviceId(id);
+        return getUnlockedCounts(id, totals);
+      })
+      .then(setUnlocked)
+      .catch((err) => {
+        console.warn(err);
+        setUnlocked(null);
+      });
+  }, [totals]);
+
+  useEffect(() => {
     if (!hasValidAdAccess(adExpiresAt)) {
       setSelected((prev) => prev.slice(0, 2));
     }
@@ -108,19 +140,42 @@ export const PartsSelectionScreen: React.FC<Props> = ({ route, navigation }) => 
 
   const categories = useMemo(
     () => [
-      { title: "동물", data: ANIMALS },
-      { title: "곤충/소형", data: INSECTS },
-      { title: "과일", data: FRUITS },
-      { title: "야채/식물", data: VEGGIES },
-      { title: "사물/도구", data: OBJECTS },
-      { title: "자연/기상", data: NATURAL },
-      { title: "판타지/마스코트", data: FANTASY },
+      { title: "동물", data: ANIMALS, key: "ANIMALS" as CategoryKey },
+      { title: "곤충/소형", data: INSECTS, key: "INSECTS" as CategoryKey },
+      { title: "과일", data: FRUITS, key: "FRUITS" as CategoryKey },
+      { title: "야채/식물", data: VEGGIES, key: "VEGGIES" as CategoryKey },
+      { title: "사물/도구", data: OBJECTS, key: "OBJECTS" as CategoryKey },
+      { title: "자연/기상", data: NATURAL, key: "NATURAL" as CategoryKey },
+      { title: "판타지/마스코트", data: FANTASY, key: "FANTASY" as CategoryKey },
     ],
     []
   );
 
+  const handleUnlockMore = async (category: CategoryKey) => {
+    if (!deviceId) return;
+    try {
+      setUnlockingCat(category);
+      // 광고 시청 스텁
+      await new Promise((res) => setTimeout(res, 1500));
+      const updated = await incrementUnlock(deviceId, category, totals);
+      setUnlocked(updated);
+      Alert.alert("확장 완료", "추가 파츠가 열렸어요!");
+    } catch (err) {
+      console.warn(err);
+      Alert.alert("확장 실패", "추가 파츠를 여는 데 실패했어요.");
+    } finally {
+      setUnlockingCat(null);
+    }
+  };
+
+  const getVisibleParts = (key: CategoryKey, data: string[]) => {
+    const limit = unlocked?.[key] ?? DEFAULT_UNLOCK;
+    return data.slice(0, limit);
+  };
+
   return (
     <View style={styles.container}>
+      <BannerAd />
       <Text style={styles.title}>파츠를 골라봐요</Text>
       <Text style={styles.subtitle}>최소 {MIN_PARTS}개, 최대 {maxParts}개까지 선택</Text>
       <Text style={styles.premium}>{isPremium ? "프리미엄 모드" : "무료 모드"}</Text>
@@ -156,7 +211,7 @@ export const PartsSelectionScreen: React.FC<Props> = ({ route, navigation }) => 
           <View key={cat.title} style={styles.category}>
             <Text style={styles.categoryTitle}>{cat.title}</Text>
             <View style={styles.chipRow}>
-              {cat.data.map((part) => {
+              {getVisibleParts(cat.key, cat.data).map((part) => {
                 const active = selected.includes(part);
                 return (
                   <TouchableOpacity
@@ -169,6 +224,18 @@ export const PartsSelectionScreen: React.FC<Props> = ({ route, navigation }) => 
                 );
               })}
             </View>
+            {unlocked && unlocked[cat.key] < cat.data.length && (
+              <View style={styles.moreRow}>
+                <Text style={styles.moreText}>
+                  {unlocked[cat.key]}/{cat.data.length} 공개됨
+                </Text>
+                <Button
+                  title={unlockingCat === cat.key ? "열는 중..." : "더보기 (광고)"}
+                  onPress={() => handleUnlockMore(cat.key)}
+                  disabled={!!unlockingCat}
+                />
+              </View>
+            )}
           </View>
         ))}
       </ScrollView>
@@ -231,5 +298,7 @@ const styles = StyleSheet.create({
   },
   chipText: { color: "#333" },
   chipTextActive: { color: "#fff" },
+  moreRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: 6 },
+  moreText: { fontSize: 12, color: "#666" },
   footer: { flexDirection: "row", justifyContent: "flex-end", alignItems: "center", marginTop: 8 }
 });

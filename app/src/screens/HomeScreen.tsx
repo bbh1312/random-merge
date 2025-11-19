@@ -4,6 +4,7 @@ import { View, Text, Button, StyleSheet } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../../App";
 import { useSoundSetting } from "../context/SoundContext";
+import { BannerAd } from "../components/BannerAd";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Home">;
 
@@ -15,6 +16,7 @@ export const HomeScreen: React.FC<Props> = ({ navigation }) => {
       <View style={styles.topRow}>
         <Button title={muted ? "사운드 꺼짐" : "사운드 켜짐"} onPress={toggleMuted} />
       </View>
+      <BannerAd />
       <Text style={styles.title}>랜덤 캐릭터 합성기</Text>
       <Text style={styles.subtitle}>이상한 조합의 친구들을 만들어보자!</Text>
 

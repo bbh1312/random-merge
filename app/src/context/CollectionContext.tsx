@@ -14,6 +14,7 @@ interface CollectionContextValue {
   slots: SlotsResponse | null;
   refreshSlots: (deviceId: string) => Promise<void>;
   addCharacter: (character: CharacterResponse, parts: string[], deviceId: string) => Promise<void>;
+  replaceLatest: (character: CharacterResponse, parts: string[], deviceId: string) => Promise<void>;
 }
 
 const CollectionContext = createContext<CollectionContextValue | undefined>(undefined);
@@ -40,8 +41,18 @@ export const CollectionProvider = ({ children }: { children: ReactNode }) => {
     setSlots(newSlots);
   };
 
+  const replaceLatest = async (character: CharacterResponse, parts: string[], deviceId: string) => {
+    const { item, slots: newSlots } = await saveCollectionItem(deviceId, character, parts);
+    const newItem: CollectedCharacter = { ...item, parts: item.parts ?? parts };
+    setCollection((prev) => {
+      const [, ...rest] = prev;
+      return [newItem, ...rest];
+    });
+    setSlots(newSlots);
+  };
+
   return (
-    <CollectionContext.Provider value={{ collection, slots, refreshSlots, addCharacter }}>
+    <CollectionContext.Provider value={{ collection, slots, refreshSlots, addCharacter, replaceLatest }}>
       {children}
     </CollectionContext.Provider>
   );
