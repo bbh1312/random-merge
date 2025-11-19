@@ -316,3 +316,17 @@ npm run start
 - 주의:
   - 광고 실패/취소 시 슬롯 미지급.
   - 멀티 디바이스 동시 사용 시 서버 값을 매 호출마다 갱신 표시.
+
+## 16. 도감 삭제 정책
+- 기본 무료 삭제 횟수: 일/세션당 10개(초기값 10). 삭제는 사용자 선택형(체크박스 다중 선택 후 일괄 삭제)이어야 함.
+- 삭제 횟수 소진 시: 광고 시청으로 삭제 가능 횟수를 10회로 리필(상한 10).
+- 서버 규칙:
+  - `GET /collection/delete-quota` → `{ remaining, max: 10 }`
+  - `POST /collection/delete` → `{ ids: string[] }` 형태로 요청, `remaining` 감소. `remaining` < `ids.length`이면 403 `DELETE_QUOTA_EXCEEDED`.
+  - `POST /ad/claim-delete-quota` → 광고 완료 시 `remaining`을 10으로 재설정(상한 10).
+  - 삭제는 `userId`/`deviceId` 기준으로 관리, 멀티 디바이스 동기화.
+- 클라이언트 UX:
+  - 도감 목록에서 다중 선택 모드 제공(선택/취소, 전체 선택, 선택 해제).
+  - 상단에 삭제 가능 횟수 `remaining/10` 표시, 0일 때 광고 CTA 노출.
+  - 삭제 시 확인 다이얼로그, 성공 후 토스트/갱신.
+  - 광고 시청 후 `remaining`이 10으로 리필되었다는 안내.
