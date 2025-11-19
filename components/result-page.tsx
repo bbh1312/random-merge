@@ -18,50 +18,27 @@ interface ResultPageProps {
   onPullAgain: () => void;
 }
 
-export default function ResultPage({
-  character,
-  onSaveToCollection,
-  onViewCollection,
-  onPullAgain,
-}: ResultPageProps) {
+export default function ResultPage({ character, onSaveToCollection, onViewCollection, onPullAgain }: ResultPageProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [showContent, setShowContent] = useState(false);
 
   useEffect(() => {
-    const loadingTimer = setTimeout(() => {
+    const timer = setTimeout(() => {
       setIsLoading(false);
       setTimeout(() => setShowContent(true), 100);
     }, 2000);
-
-    return () => clearTimeout(loadingTimer);
+    return () => clearTimeout(timer);
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-pink-50 via-purple-50 to-blue-50 flex flex-col items-center justify-center p-4 relative overflow-hidden">
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        {[...Array(10)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-2 h-2 bg-primary/30 rounded-full"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animation: `float ${3 + Math.random() * 4}s ease-in-out infinite`,
-              animationDelay: `${i * 0.3}s`,
-            }}
-          />
-        ))}
-      </div>
-
+    <div className="min-h-[calc(100vh-120px)] w-full bg-gradient-to-b from-pink-50 via-purple-50 to-blue-50 flex flex-col items-center justify-center p-4">
       {isLoading && (
-        <div className="max-w-md w-full">
-          <div className="text-center">
-            <div className="inline-block mb-6">
-              <div className="w-24 h-24 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
-            </div>
-            <h2 className="text-2xl font-bold text-foreground mb-2">캐릭터 생성 중...</h2>
-            <p className="text-muted-foreground">마법이 일어나고 있어요✨</p>
+        <div className="max-w-[480px] w-full text-center">
+          <div className="inline-block mb-6">
+            <div className="w-16 h-16 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
           </div>
+          <h2 className="text-2xl font-bold text-foreground mb-2">캐릭터 생성 중...</h2>
+          <p className="text-muted-foreground">마법이 일어나고 있어요✨</p>
         </div>
       )}
 
@@ -99,21 +76,6 @@ export default function ResultPage({
               <p className="text-sm text-foreground leading-relaxed">{character.description}</p>
             </div>
 
-            <div className="grid grid-cols-3 gap-2 mb-4 py-3 border-y border-border text-center text-xs">
-              <div>
-                <div className="text-xl">🎨</div>
-                <p className="text-muted-foreground">생성됨</p>
-              </div>
-              <div>
-                <div className="text-xl">⭐</div>
-                <p className="text-muted-foreground">등급 S</p>
-              </div>
-              <div>
-                <div className="text-xl">💫</div>
-                <p className="text-muted-foreground">독창성</p>
-              </div>
-            </div>
-
             <div className="space-y-2 mt-auto">
               <Button
                 onClick={onSaveToCollection}
@@ -124,18 +86,10 @@ export default function ResultPage({
               </Button>
 
               <div className="grid grid-cols-2 gap-2">
-                <Button
-                  onClick={onPullAgain}
-                  variant="outline"
-                  className="py-4 text-sm font-bold rounded-lg border-2"
-                >
+                <Button onClick={onPullAgain} variant="outline" className="py-4 text-sm font-bold rounded-lg border-2">
                   한 번 더 뽑기
                 </Button>
-                <Button
-                  onClick={onViewCollection}
-                  variant="outline"
-                  className="py-4 text-sm font-bold rounded-lg border-2"
-                >
+                <Button onClick={onViewCollection} variant="outline" className="py-4 text-sm font-bold rounded-lg border-2">
                   도감 보기
                 </Button>
               </div>
