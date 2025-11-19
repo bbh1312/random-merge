@@ -55,9 +55,9 @@ export default function PartsSelectionPage({
   isPremium,
 }: PartsSelectionPageProps) {
   const categoryEntries = Object.entries(CATEGORIES);
+  const defaultCategory = categoryEntries[0]?.[0] ?? null;
   const [selectedParts, setSelectedParts] = useState<string[]>([]);
-  const [view, setView] = useState<'categories' | 'parts'>('categories');
-  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [activeCategory, setActiveCategory] = useState<string | null>(defaultCategory);
 
   const handleSelectPart = (part: string) => {
     setSelectedParts((prev) => {
@@ -68,16 +68,6 @@ export default function PartsSelectionPage({
       }
       return prev;
     });
-  };
-
-  const handleCategoryClick = (categoryKey: string) => {
-    setActiveCategory(categoryKey);
-    setView('parts');
-  };
-
-  const handleBackToCategories = () => {
-    setView('categories');
-    setActiveCategory(null);
   };
 
   const handleGenerate = () => {
@@ -92,11 +82,11 @@ export default function PartsSelectionPage({
       <div className="max-w-2xl mx-auto w-full mb-6">
         <div className="flex items-center justify-between mb-6">
           <button
-            onClick={view === 'parts' ? handleBackToCategories : onBack}
+            onClick={onBack}
             className="flex items-center gap-2 text-foreground hover:text-primary transition-colors font-medium"
           >
             <ArrowLeft className="w-5 h-5" />
-            {view === 'parts' ? '카테고리 다시 선택' : '홈으로'}
+            홈으로
           </button>
           <div className="bg-white/80 backdrop-blur px-4 py-2 rounded-full shadow-sm border border-purple-100">
             <p className="text-sm font-bold text-primary">
@@ -106,12 +96,10 @@ export default function PartsSelectionPage({
         </div>
 
         <h1 className="text-3xl font-bold text-foreground mb-2">
-          {view === 'categories' ? '카테고리 선택' : CATEGORIES[activeCategory as keyof typeof CATEGORIES]?.name}
+          {CATEGORIES[activeCategory as keyof typeof CATEGORIES]?.name ?? '파츠 선택'}
         </h1>
         <p className="text-muted-foreground">
-          {view === 'categories' 
-            ? '원하는 파츠가 있는 카테고리를 선택해주세요' 
-            : '마음에 드는 파츠를 선택해주세요'}
+          마음에 드는 파츠를 선택해주세요
         </p>
       </div>
 
@@ -141,72 +129,47 @@ export default function PartsSelectionPage({
 
       {/* Main Content Area */}
       <div className="max-w-2xl mx-auto w-full flex-1">
-        {view === 'categories' ? (
-          <div className="grid grid-cols-2 gap-4">
-            {categoryEntries.map(([key, category]) => (
-              <button
-                key={key}
-                onClick={() => handleCategoryClick(key)}
-                className={`${category.color} bg-opacity-20 hover:bg-opacity-30 p-6 rounded-2xl transition-all transform hover:scale-[1.02] hover:shadow-md text-left group relative overflow-hidden border-2 border-transparent hover:border-current`}
-              >
-                <div className="text-4xl mb-3 transform group-hover:scale-110 transition-transform duration-300">
-                  {category.emoji}
-                </div>
-                <h3 className="text-xl font-bold mb-1">{category.name}</h3>
-                <p className="text-sm opacity-70">{category.parts.length}개의 파츠</p>
-                
-                {/* Selection Indicator */}
-                {category.parts.some(p => selectedParts.includes(p)) && (
-                  <div className="absolute top-3 right-3 bg-white rounded-full p-1 shadow-sm">
-                    <Check className="w-4 h-4 text-green-500" />
-                  </div>
-                )}
-              </button>
-            ))}
+        <div className="bg-white rounded-3xl p-6 shadow-sm border border-purple-50">
+          <div className="flex gap-3 overflow-x-auto pb-4 mb-4">
+            {categoryEntries.map(([key, category]) => {
+              const isActive = key === activeCategory;
+              return (
+                <button
+                  key={key}
+                  onClick={() => setActiveCategory(key)}
+                  className={`px-4 py-2 rounded-full border text-sm font-semibold transition-colors whitespace-nowrap ${
+                    isActive ? 'bg-primary text-white border-primary' : 'bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100'
+                  }`}
+                >
+                  {category.name}
+                </button>
+              );
+            })}
           </div>
-        ) : (
-          <div className="bg-white rounded-3xl p-6 shadow-sm border border-purple-50">
-            <div className="flex gap-3 overflow-x-auto pb-4 mb-4">
-              {categoryEntries.map(([key, category]) => {
-                const isActive = key === activeCategory;
-                return (
-                  <button
-                    key={key}
-                    onClick={() => setActiveCategory(key)}
-                    className={`px-4 py-2 rounded-full border text-sm font-semibold transition-colors whitespace-nowrap ${
-                      isActive ? 'bg-primary text-white border-primary' : 'bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100'
-                    }`}
-                  >
-                    {category.name}
-                  </button>
-                );
-              })}
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {activeCategory && CATEGORIES[activeCategory as keyof typeof CATEGORIES].parts.map((part) => {
-                const isSelected = selectedParts.includes(part);
-                return (
-                  <button
-                    key={part}
-                    onClick={() => handleSelectPart(part)}
-                    className={`py-4 px-4 rounded-xl font-bold transition-all transform hover:scale-105 relative overflow-hidden ${
-                      isSelected
-                        ? 'bg-primary text-primary-foreground shadow-lg ring-2 ring-primary ring-offset-2'
-                        : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-100'
-                    }`}
-                  >
-                    {part}
-                    {isSelected && (
-                      <div className="absolute top-2 right-2">
-                        <Check className="w-4 h-4" />
-                      </div>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {activeCategory && CATEGORIES[activeCategory as keyof typeof CATEGORIES].parts.map((part) => {
+              const isSelected = selectedParts.includes(part);
+              return (
+                <button
+                  key={part}
+                  onClick={() => handleSelectPart(part)}
+                  className={`py-4 px-4 rounded-xl font-bold transition-all transform hover:scale-105 relative overflow-hidden ${
+                    isSelected
+                      ? 'bg-primary text-primary-foreground shadow-lg ring-2 ring-primary ring-offset-2'
+                      : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-100'
+                  }`}
+                >
+                  {part}
+                  {isSelected && (
+                    <div className="absolute top-2 right-2">
+                      <Check className="w-4 h-4" />
+                    </div>
+                  )}
+                </button>
+              );
+            })}
           </div>
-        )}
+        </div>
       </div>
 
       {/* Generate Button - Fixed at bottom or below content */}
