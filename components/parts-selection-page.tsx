@@ -80,6 +80,9 @@ export default function PartsSelectionPage({
     <div className="min-h-screen bg-gradient-to-b from-purple-50 via-blue-50 to-pink-50 p-4 flex flex-col">
       {/* Header */}
       <div className="max-w-2xl mx-auto w-full mb-6">
+        <div className="w-full bg-white/80 rounded-2xl border border-dashed border-slate-300 text-slate-500 text-sm font-semibold text-center py-3 mb-4">
+          고정 광고 영역
+        </div>
         <div className="flex items-center justify-between mb-6">
           <button
             onClick={onBack}
