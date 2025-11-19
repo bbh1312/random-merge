@@ -130,17 +130,18 @@ export default function PartsSelectionPage({
       {/* Main Content Area */}
       <div className="max-w-2xl mx-auto w-full flex-1">
         <div className="bg-white rounded-3xl p-6 shadow-sm border border-purple-50">
-          <div className="flex gap-3 overflow-x-auto pb-4 mb-4">
+         <div className="flex gap-3 overflow-x-auto pb-4 mb-4">
             {categoryEntries.map(([key, category]) => {
               const isActive = key === activeCategory;
               return (
                 <button
                   key={key}
                   onClick={() => setActiveCategory(key)}
-                  className={`px-4 py-2 rounded-full border text-sm font-semibold transition-colors whitespace-nowrap ${
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-semibold transition-colors whitespace-nowrap ${
                     isActive ? 'bg-primary text-white border-primary' : 'bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100'
                   }`}
                 >
+                  <span className="text-xl">{category.emoji}</span>
                   {category.name}
                 </button>
               );
