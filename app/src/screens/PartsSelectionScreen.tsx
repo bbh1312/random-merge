@@ -150,6 +150,7 @@ export const PartsSelectionScreen: React.FC<Props> = ({ route, navigation }) => 
     ],
     []
   );
+  const [activeCategory, setActiveCategory] = useState<CategoryKey>(categories[0]?.key ?? "ANIMALS");
 
   const handleUnlockMore = async (category: CategoryKey) => {
     if (!deviceId) return;
@@ -207,37 +208,54 @@ export const PartsSelectionScreen: React.FC<Props> = ({ route, navigation }) => 
       </View>
 
       <ScrollView contentContainerStyle={styles.list}>
-        {categories.map((cat) => (
-          <View key={cat.title} style={styles.category}>
-            <Text style={styles.categoryTitle}>{cat.title}</Text>
-            <View style={styles.chipRow}>
-              {getVisibleParts(cat.key, cat.data).map((part) => {
-                const active = selected.includes(part);
-                return (
-                  <TouchableOpacity
-                    key={part}
-                    style={[styles.chip, active && styles.chipActive]}
-                    onPress={() => togglePart(part)}
-                  >
-                    <Text style={active ? styles.chipTextActive : styles.chipText}>{part}</Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-            {unlocked && unlocked[cat.key] < cat.data.length && (
-              <View style={styles.moreRow}>
-                <Text style={styles.moreText}>
-                  {unlocked[cat.key]}/{cat.data.length} 공개됨
-                </Text>
-                <Button
-                  title={unlockingCat === cat.key ? "열는 중..." : "더보기 (광고)"}
-                  onPress={() => handleUnlockMore(cat.key)}
-                  disabled={!!unlockingCat}
-                />
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tabBar}>
+          {categories.map((cat) => {
+            const active = cat.key === activeCategory;
+            return (
+              <TouchableOpacity
+                key={cat.key}
+                style={[styles.tab, active && styles.tabActive]}
+                onPress={() => setActiveCategory(cat.key)}
+              >
+                <Text style={active ? styles.tabTextActive : styles.tabText}>{cat.title}</Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+
+        {categories
+          .filter((c) => c.key === activeCategory)
+          .map((cat) => (
+            <View key={cat.key} style={styles.category}>
+              <Text style={styles.categoryTitle}>{cat.title}</Text>
+              <View style={styles.chipRow}>
+                {getVisibleParts(cat.key, cat.data).map((part) => {
+                  const active = selected.includes(part);
+                  return (
+                    <TouchableOpacity
+                      key={part}
+                      style={[styles.chip, active && styles.chipActive]}
+                      onPress={() => togglePart(part)}
+                    >
+                      <Text style={active ? styles.chipTextActive : styles.chipText}>{part}</Text>
+                    </TouchableOpacity>
+                  );
+                })}
               </View>
-            )}
-          </View>
-        ))}
+              {unlocked && unlocked[cat.key] < cat.data.length && (
+                <View style={styles.moreRow}>
+                  <Text style={styles.moreText}>
+                    {unlocked[cat.key]}/{cat.data.length} 공개됨
+                  </Text>
+                  <Button
+                    title={unlockingCat === cat.key ? "열는 중..." : "더보기 (광고)"}
+                    onPress={() => handleUnlockMore(cat.key)}
+                    disabled={!!unlockingCat}
+                  />
+                </View>
+              )}
+            </View>
+          ))}
       </ScrollView>
 
       <View style={styles.footer}>
@@ -300,5 +318,21 @@ const styles = StyleSheet.create({
   chipTextActive: { color: "#fff" },
   moreRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: 6 },
   moreText: { fontSize: 12, color: "#666" },
+  tabBar: { marginBottom: 12 },
+  tab: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    marginRight: 8,
+    backgroundColor: "#fff"
+  },
+  tabActive: {
+    backgroundColor: "#4a90e2",
+    borderColor: "#4a90e2"
+  },
+  tabText: { color: "#333" },
+  tabTextActive: { color: "#fff" },
   footer: { flexDirection: "row", justifyContent: "flex-end", alignItems: "center", marginTop: 8 }
 });
