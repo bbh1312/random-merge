@@ -21,9 +21,6 @@ export default function HomePage({
 }: HomePageProps) {
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 via-purple-50 to-orange-50 flex flex-col items-center justify-center p-4">
-      <div className="w-full max-w-md bg-white/80 rounded-2xl border border-dashed border-slate-300 text-slate-500 text-sm font-semibold text-center py-4 mb-6">
-        고정 광고 영역
-      </div>
       {/* User Profile/Signup Button at top right */}
       <div className="absolute top-4 right-4">
         {user ? (
