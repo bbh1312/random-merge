@@ -53,9 +53,9 @@ export const PartsSelectionScreen: React.FC<Props> = ({ route, navigation }) => 
     }
     try {
       setLoading(true);
-      const deviceId = isPremium ? await getDeviceId() : undefined;
+      const deviceId = await getDeviceId();
       const character = await generateCharacter(selected, { premium: isPremium, deviceId, adToken: adToken ?? undefined });
-      addCharacter(character, selected);
+      await addCharacter(character, selected, deviceId);
       navigation.navigate("Result");
     } catch (err: any) {
       console.warn(err);

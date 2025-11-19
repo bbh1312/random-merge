@@ -1,6 +1,7 @@
 
 import React, { createContext, useContext, useState, ReactNode } from "react";
-import type { CharacterResponse } from "../services/api";
+import type { CharacterResponse, CollectionItem, SlotsResponse } from "../services/api";
+import { getCollectionSlots, saveCollectionItem } from "../services/api";
 
 export interface CollectedCharacter extends CharacterResponse {
   id: string;
@@ -10,7 +11,9 @@ export interface CollectedCharacter extends CharacterResponse {
 
 interface CollectionContextValue {
   collection: CollectedCharacter[];
-  addCharacter: (character: CharacterResponse, parts: string[]) => void;
+  slots: SlotsResponse | null;
+  refreshSlots: (deviceId: string) => Promise<void>;
+  addCharacter: (character: CharacterResponse, parts: string[], deviceId: string) => Promise<void>;
 }
 
 const CollectionContext = createContext<CollectionContextValue | undefined>(undefined);
@@ -23,19 +26,22 @@ export const useCollection = () => {
 
 export const CollectionProvider = ({ children }: { children: ReactNode }) => {
   const [collection, setCollection] = useState<CollectedCharacter[]>([]);
+  const [slots, setSlots] = useState<SlotsResponse | null>(null);
 
-  const addCharacter = (character: CharacterResponse, parts: string[]) => {
-    const newItem: CollectedCharacter = {
-      ...character,
-      id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
-      createdAt: new Date().toISOString(),
-      parts,
-    };
+  const refreshSlots = async (deviceId: string) => {
+    const data = await getCollectionSlots(deviceId);
+    setSlots(data);
+  };
+
+  const addCharacter = async (character: CharacterResponse, parts: string[], deviceId: string) => {
+    const { item, slots: newSlots } = await saveCollectionItem(deviceId, character, parts);
+    const newItem: CollectedCharacter = { ...item, parts: item.parts ?? parts };
     setCollection((prev) => [newItem, ...prev]);
+    setSlots(newSlots);
   };
 
   return (
-    <CollectionContext.Provider value={{ collection, addCharacter }}>
+    <CollectionContext.Provider value={{ collection, slots, refreshSlots, addCharacter }}>
       {children}
     </CollectionContext.Provider>
   );

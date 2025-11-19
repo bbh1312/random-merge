@@ -1,7 +1,7 @@
 
 import { openai } from "../openaiClient";
 import { makePartsKey } from "../utils/partsKey";
-import { getFromCache, setToCache } from "../..//cache";
+import { getFromCache, setToCache } from "../cache";
 
 export interface GeneratedCharacter {
   name: string;
