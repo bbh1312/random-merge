@@ -36,92 +36,92 @@ export default function PartsSelectionPage({ onPartsSelected, onBack }: PartsSel
   };
 
   const handleGenerate = () => {
-    if (selectedParts.length === 2) {
-      onPartsSelected(selectedParts);
-    }
+    if (selectedParts.length === 2) onPartsSelected(selectedParts);
   };
 
   const currentCategory = activeCategory ? CATEGORIES[activeCategory] : undefined;
 
   return (
-    <div className="min-h-[calc(100vh-120px)] bg-gradient-to-b from-purple-50 via-blue-50 to-pink-50 p-4 flex flex-col items-center">
+    <div className="min-h-[calc(100vh-120px)] bg-gradient-to-b from-purple-50 via-blue-50 to-pink-50 px-4 py-4 flex flex-col items-center">
       <div className="w-full max-w-[480px] min-w-[320px] flex-1 flex flex-col">
-        <div className="flex items-center justify-between mb-6">
-          <button onClick={onBack} className="flex items-center gap-2 text-foreground hover:text-primary transition-colors font-medium">
-            <ArrowLeft className="w-5 h-5" /> 홈으로
+        <div className="flex items-center justify-between mb-4">
+          <button onClick={onBack} className="flex items-center gap-2 text-foreground hover:text-primary transition-colors font-medium text-sm">
+            <ArrowLeft className="w-4 h-4" /> 홈으로
           </button>
-          <div className="bg-white/80 backdrop-blur px-4 py-2 rounded-full shadow-sm border border-purple-100 text-sm font-bold text-primary">
+          <div className="bg-white/80 backdrop-blur px-3 py-1.5 rounded-full shadow-sm border border-purple-100 text-xs font-bold text-primary">
             {selectedParts.length} / 2 선택됨
           </div>
         </div>
 
-        <h1 className="text-3xl font-bold text-foreground mb-2">{currentCategory?.name ?? '파츠 선택'}</h1>
-        <p className="text-muted-foreground mb-6">마음에 드는 파츠를 선택해주세요</p>
+        <h1 className="text-2xl font-bold text-foreground mb-1">{currentCategory?.name ?? '파츠 선택'}</h1>
+        <p className="text-muted-foreground text-sm mb-4">마음에 드는 파츠를 선택해주세요</p>
 
-        <div className="bg-white/60 backdrop-blur p-4 rounded-xl border border-purple-100 flex flex-wrap items-center gap-3 mb-6">
-          <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">선택된 파츠:</span>
+        <div className="bg-white/60 backdrop-blur p-3 rounded-xl border border-purple-100 flex flex-wrap items-center gap-2 mb-4 text-sm">
+          <span className="font-medium text-muted-foreground whitespace-nowrap">선택된 파츠:</span>
           {selectedParts.length > 0 ? (
-            <div className="flex gap-2 flex-wrap">
+            <div className="flex gap-1.5 flex-wrap">
               {selectedParts.map((part) => (
-                <span key={part} className="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-bold flex items-center gap-1">
+                <span key={part} className="bg-primary/10 text-primary px-2.5 py-1 rounded-full font-semibold flex items-center gap-1">
                   {part}
-                  <button onClick={() => handleSelectPart(part)} className="hover:text-red-500 ml-1">×</button>
+                  <button onClick={() => handleSelectPart(part)} className="hover:text-red-500">×</button>
                 </span>
               ))}
             </div>
           ) : (
-            <span className="text-sm text-muted-foreground">아직 선택된 파츠가 없어요</span>
+            <span className="text-muted-foreground">아직 선택된 파츠가 없어요</span>
           )}
         </div>
 
-        <div className="bg-white rounded-3xl p-6 shadow-sm border border-purple-50 flex-1 flex flex-col">
-          <div className="flex gap-3 overflow-x-auto pb-4 mb-4">
+        <div className="bg-white rounded-2xl p-4 shadow-sm border border-purple-50 flex-1 flex flex-col">
+          <div className="flex gap-2 overflow-x-auto pb-3 mb-3">
             {entries.map(([key, category]) => {
               const active = key === activeCategory;
               return (
                 <button
                   key={key}
                   onClick={() => setActiveCategory(key as CategoryKey)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-semibold whitespace-nowrap transition-colors ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-semibold whitespace-nowrap transition-colors ${
                     active ? 'bg-primary text-white border-primary' : 'bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100'
                   }`}
                 >
-                  <span className="text-xl">{category.emoji}</span>
+                  <span className="text-lg">{category.emoji}</span>
                   {category.name}
                 </button>
               );
             })}
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {(currentCategory?.parts ?? []).map((part) => {
-              const active = selectedParts.includes(part);
-              return (
-                <button
-                  key={part}
-                  onClick={() => handleSelectPart(part)}
-                  className={`py-4 px-4 rounded-xl font-bold transition-all transform hover:scale-105 relative ${
-                    active
-                      ? 'bg-primary text-primary-foreground shadow-lg ring-2 ring-primary ring-offset-2'
-                      : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-100'
-                  }`}
-                >
-                  {part}
-                  {active && (
-                    <div className="absolute top-2 right-2">
-                      <Check className="w-4 h-4" />
-                    </div>
-                  )}
-                </button>
-              );
-            })}
+          <div className="flex-1 overflow-y-auto pr-1">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {(currentCategory?.parts ?? []).map((part) => {
+                const active = selectedParts.includes(part);
+                return (
+                  <button
+                    key={part}
+                    onClick={() => handleSelectPart(part)}
+                    className={`py-3 px-3 rounded-xl text-sm font-semibold transition-all transform hover:scale-105 relative ${
+                      active
+                        ? 'bg-primary text-primary-foreground shadow-lg ring-2 ring-primary ring-offset-2'
+                        : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-100'
+                    }`}
+                  >
+                    {part}
+                    {active && (
+                      <div className="absolute top-2 right-2">
+                        <Check className="w-4 h-4" />
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
 
-        <div className="w-full mt-8">
+        <div className="w-full mt-5">
           <Button
             onClick={handleGenerate}
             disabled={selectedParts.length !== 2}
-            className="w-full py-6 text-lg font-bold rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed bg-gradient-to-r from-primary to-orange-500 hover:shadow-xl hover:shadow-primary/30 transition-all transform hover:-translate-y-1"
+            className="w-full py-5 text-base font-bold rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed bg-gradient-to-r from-primary to-orange-500 hover:shadow-lg transition-all"
           >
             {selectedParts.length === 2 ? '캐릭터 생성하기 ✨' : `${2 - selectedParts.length}개 더 선택해주세요`}
           </Button>
