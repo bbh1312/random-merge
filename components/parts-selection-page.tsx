@@ -54,6 +54,7 @@ export default function PartsSelectionPage({
   onBack,
   isPremium,
 }: PartsSelectionPageProps) {
+  const categoryEntries = Object.entries(CATEGORIES);
   const [selectedParts, setSelectedParts] = useState<string[]>([]);
   const [view, setView] = useState<'categories' | 'parts'>('categories');
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
@@ -115,11 +116,11 @@ export default function PartsSelectionPage({
       </div>
 
       {/* Selected Parts Preview Bar */}
-      {selectedParts.length > 0 && (
-        <div className="max-w-2xl mx-auto w-full mb-6">
-          <div className="bg-white/60 backdrop-blur p-4 rounded-xl border border-purple-100 flex items-center gap-3">
-            <span className="text-sm font-medium text-muted-foreground">선택된 파츠:</span>
-            <div className="flex gap-2">
+      <div className="max-w-2xl mx-auto w-full mb-6">
+        <div className="bg-white/60 backdrop-blur p-4 rounded-xl border border-purple-100 flex flex-wrap items-center gap-3">
+          <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">선택된 파츠:</span>
+          {selectedParts.length > 0 ? (
+            <div className="flex gap-2 flex-wrap">
               {selectedParts.map((part) => (
                 <span key={part} className="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-bold flex items-center gap-1">
                   {part}
@@ -132,15 +133,17 @@ export default function PartsSelectionPage({
                 </span>
               ))}
             </div>
-          </div>
+          ) : (
+            <span className="text-sm text-muted-foreground">아직 선택된 파츠가 없어요</span>
+          )}
         </div>
-      )}
+      </div>
 
       {/* Main Content Area */}
       <div className="max-w-2xl mx-auto w-full flex-1">
         {view === 'categories' ? (
           <div className="grid grid-cols-2 gap-4">
-            {Object.entries(CATEGORIES).map(([key, category]) => (
+            {categoryEntries.map(([key, category]) => (
               <button
                 key={key}
                 onClick={() => handleCategoryClick(key)}
@@ -163,6 +166,22 @@ export default function PartsSelectionPage({
           </div>
         ) : (
           <div className="bg-white rounded-3xl p-6 shadow-sm border border-purple-50">
+            <div className="flex gap-3 overflow-x-auto pb-4 mb-4">
+              {categoryEntries.map(([key, category]) => {
+                const isActive = key === activeCategory;
+                return (
+                  <button
+                    key={key}
+                    onClick={() => setActiveCategory(key)}
+                    className={`px-4 py-2 rounded-full border text-sm font-semibold transition-colors whitespace-nowrap ${
+                      isActive ? 'bg-primary text-white border-primary' : 'bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100'
+                    }`}
+                  >
+                    {category.name}
+                  </button>
+                );
+              })}
+            </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {activeCategory && CATEGORIES[activeCategory as keyof typeof CATEGORIES].parts.map((part) => {
                 const isSelected = selectedParts.includes(part);
