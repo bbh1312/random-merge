@@ -90,7 +90,7 @@ export default function PartsSelectionPage({ onPartsSelected, onBack }: PartsSel
               );
             })}
           </div>
-          <div className="flex-1 overflow-y-auto pr-1">
+          <div className="flex-1 overflow-y-auto pr-1 pb-1">
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {(currentCategory?.parts ?? []).map((part) => {
                 const active = selectedParts.includes(part);
