@@ -44,9 +44,9 @@ export default function HomePage({
         </div>
 
         <div className="text-center space-y-2">
-          <h1 className="text-4xl sm:text-5xl font-bold text-foreground">Character Mix</h1>
+          <h1 className="text-4xl sm:text-5xl font-bold text-foreground">미쑤리 나라</h1>
           <p className="text-base sm:text-lg text-muted-foreground">
-            파츠를 섞어 독특한 캐릭터를 만들어보세요!
+            새로운 미쑤리 친구들을 탄생시켜보세요!
           </p>
         </div>
 
