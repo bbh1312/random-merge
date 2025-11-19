@@ -36,12 +36,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="font-sans antialiased bg-slate-50">
+      <body className="font-sans antialiased bg-slate-50 min-h-screen">
         <div className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur border-b border-dashed border-slate-300 text-slate-600 text-sm font-semibold text-center py-3">
           고정 광고 영역
         </div>
-        <div className="pt-20">
-          {children}
+        <div className="pt-20 w-full flex justify-center px-4">
+          <div className="w-full max-w-[480px] min-w-[320px]">
+            {children}
+          </div>
         </div>
         <Analytics />
       </body>

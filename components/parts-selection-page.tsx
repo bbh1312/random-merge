@@ -45,7 +45,7 @@ export default function PartsSelectionPage({ onPartsSelected, onBack }: PartsSel
 
   return (
     <div className="min-h-[calc(100vh-120px)] bg-gradient-to-b from-purple-50 via-blue-50 to-pink-50 p-4 flex flex-col items-center">
-      <div className="w-full max-w-xl flex-1 flex flex-col">
+      <div className="w-full max-w-[480px] min-w-[320px] flex-1 flex flex-col">
         <div className="flex items-center justify-between mb-6">
           <button onClick={onBack} className="flex items-center gap-2 text-foreground hover:text-primary transition-colors font-medium">
             <ArrowLeft className="w-5 h-5" /> 홈으로

@@ -22,8 +22,8 @@ export default function HomePage({
   collectionCount,
 }: HomePageProps) {
   return (
-    <div className="min-h-[calc(100vh-120px)] w-full bg-gradient-to-b from-blue-50 via-purple-50 to-orange-50 flex items-center justify-center px-4 py-8">
-      <div className="relative w-full max-w-lg flex flex-col gap-8">
+    <div className="min-h-[calc(100vh-120px)] w-full bg-gradient-to-b from-blue-50 via-purple-50 to-orange-50 flex items-center justify-center px-4 py-6">
+      <div className="relative w-full max-w-[480px] min-w-[320px] flex flex-col gap-8">
         <div className="flex justify-end">
           {user ? (
             <div className="flex items-center gap-2 bg-white/60 backdrop-blur px-4 py-2 rounded-full border border-white/50">
