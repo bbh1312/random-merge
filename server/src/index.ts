@@ -6,6 +6,7 @@ import { generateCharacter } from "./generators/characterGenerator";
 import { canUsePremium, incrementPremiumUsage, getMaxDailyPremium, getPremiumUsage } from "./services/premiumUsageStore";
 import { addToCollection, getCollection, getCollectionCount } from "./services/collectionStore";
 import { claimSlots, getBaseSlots, getExtraSlots, getMaxSlots } from "./services/slotStore";
+import { getUserProfile, upsertUserProfile } from "./services/userStore";
 
 dotenv.config();
 
@@ -17,6 +18,34 @@ app.use(express.json());
 
 app.get("/", (_req, res) => {
   res.send("Random Character API is running");
+});
+
+app.get("/users/:deviceId", (req, res) => {
+  const { deviceId } = req.params;
+  if (!deviceId) {
+    return res.status(400).json({ error: "deviceId is required" });
+  }
+  const profile = getUserProfile(deviceId);
+  if (!profile) {
+    return res.status(404).json({ error: "USER_NOT_FOUND" });
+  }
+  return res.json(profile);
+});
+
+app.post("/users", (req, res) => {
+  const { deviceId, nickname } = req.body;
+  if (!deviceId || typeof deviceId !== "string") {
+    return res.status(400).json({ error: "deviceId is required" });
+  }
+  if (!nickname || typeof nickname !== "string") {
+    return res.status(400).json({ error: "nickname is required" });
+  }
+  const trimmedNickname = nickname.trim();
+  if (!trimmedNickname) {
+    return res.status(400).json({ error: "nickname cannot be empty" });
+  }
+  const profile = upsertUserProfile(deviceId, trimmedNickname);
+  return res.json(profile);
 });
 
 app.get("/collection/slots", (req, res) => {

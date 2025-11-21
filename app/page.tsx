@@ -6,7 +6,14 @@ import PartsSelectionPage from '@/components/parts-selection-page';
 import ResultPage, { GeneratedCharacter } from '@/components/result-page';
 import CollectionPage from '@/components/collection-page';
 import SignupPage from '@/components/signup-page';
-import { apiGenerateCharacter, apiSaveCollectionItem, CollectionItem } from '@/lib/api-client';
+import {
+  apiGenerateCharacter,
+  apiGetUserProfile,
+  apiSaveCollectionItem,
+  apiUpsertUserProfile,
+  CollectionItem,
+  UserProfile,
+} from '@/lib/api-client';
 import { getDeviceId } from '@/lib/device-id';
 
 type PageType = 'home' | 'parts' | 'result' | 'collection' | 'signup';
@@ -16,18 +23,37 @@ export default function Page() {
   const [isPremium, setIsPremium] = useState(false);
   const [generatedCharacter, setGeneratedCharacter] = useState<GeneratedCharacter | null>(null);
   const [collection, setCollection] = useState<CollectionItem[]>([]);
-  const [user, setUser] = useState<{ nickname: string } | null>(null);
+  const [user, setUser] = useState<UserProfile | null>(null);
   const [deviceId, setDeviceId] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generateError, setGenerateError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [isSigningUp, setIsSigningUp] = useState(false);
+  const [signupError, setSignupError] = useState<string | null>(null);
 
   useEffect(() => {
     getDeviceId()
       .then(setDeviceId)
       .catch(() => setDeviceId(null));
   }, []);
+
+  useEffect(() => {
+    if (!deviceId) return;
+    apiGetUserProfile(deviceId)
+      .then((profile) => {
+        setUser(profile);
+      })
+      .catch(() => {
+        // ignore missing user
+      });
+  }, [deviceId]);
+
+  useEffect(() => {
+    if (user && currentPage === 'signup') {
+      setCurrentPage('home');
+    }
+  }, [user, currentPage]);
 
   const ensureDeviceId = useCallback(async () => {
     const id = deviceId ?? (await getDeviceId());
@@ -85,8 +111,19 @@ export default function Page() {
   };
 
   const handleSignup = (nickname: string) => {
-    setUser({ nickname });
-    setCurrentPage('home');
+    setIsSigningUp(true);
+    setSignupError(null);
+    ensureDeviceId()
+      .then((id) => apiUpsertUserProfile(id, nickname.trim()))
+      .then((profile) => {
+        setUser(profile);
+        setCurrentPage('home');
+      })
+      .catch((err) => {
+        console.error(err);
+        setSignupError(err instanceof Error ? err.message : '회원가입에 실패했어요.');
+      })
+      .finally(() => setIsSigningUp(false));
   };
 
   return (
@@ -106,6 +143,8 @@ export default function Page() {
         <SignupPage
           onSignup={handleSignup}
           onBack={user ? handleBackToHome : undefined}
+          loading={isSigningUp}
+          error={signupError}
         />
       )}
       {currentPage === 'parts' && (
