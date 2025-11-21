@@ -81,7 +81,8 @@ async function generateImageUrl(imagePrompt: string): Promise<string> {
     n: 1,
   });
 
-  const url = img.data[0]?.url;
+  const firstResult = img.data?.[0];
+  const url = firstResult?.url;
   if (!url) {
     throw new Error("No image URL from OpenAI");
   }
