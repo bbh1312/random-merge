@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { CollectionItem } from '@/lib/api-client';
 import { Sparkles, Star, User } from 'lucide-react';
 
 interface HomePageProps {
@@ -8,7 +9,7 @@ interface HomePageProps {
   onViewCollection: () => void;
   onSignup: () => void;
   user: { nickname: string } | null;
-  recentCharacter: any | null;
+  recentCharacter: CollectionItem | null;
   collectionCount: number;
 }
 
@@ -86,7 +87,7 @@ export default function HomePage({
               <p className="text-sm text-muted-foreground mb-2">최근 조합</p>
               <div className="flex items-center gap-3">
                 <img
-                  src="/cute-character.png"
+                  src={recentCharacter.imageUrl || "/placeholder.svg"}
                   alt={recentCharacter.name}
                   className="w-16 h-16 rounded-lg object-cover"
                 />

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Check } from 'lucide-react';
 
@@ -16,16 +16,19 @@ const CATEGORIES = {
 type CategoryKey = keyof typeof CATEGORIES;
 
 interface PartsSelectionPageProps {
-  onPartsSelected: (parts: string[]) => void;
+  onPartsSelected: (parts: string[]) => Promise<void> | void;
   onBack: () => void;
   isPremium: boolean;
+  isLoading?: boolean;
+  error?: string | null;
 }
 
-export default function PartsSelectionPage({ onPartsSelected, onBack }: PartsSelectionPageProps) {
+export default function PartsSelectionPage({ onPartsSelected, onBack, isPremium, isLoading, error }: PartsSelectionPageProps) {
   const entries = Object.entries(CATEGORIES);
   const defaultCategory = entries[0]?.[0] as CategoryKey | undefined;
   const [selectedParts, setSelectedParts] = useState<string[]>([]);
   const [activeCategory, setActiveCategory] = useState<CategoryKey | undefined>(defaultCategory);
+  const selectedCountLabel = useMemo(() => `${selectedParts.length} / 2 선택됨`, [selectedParts.length]);
 
   const handleSelectPart = (part: string) => {
     setSelectedParts((prev) => {
@@ -35,8 +38,10 @@ export default function PartsSelectionPage({ onPartsSelected, onBack }: PartsSel
     });
   };
 
-  const handleGenerate = () => {
-    if (selectedParts.length === 2) onPartsSelected(selectedParts);
+  const handleGenerate = async () => {
+    if (selectedParts.length === 2) {
+      await onPartsSelected(selectedParts);
+    }
   };
 
   const currentCategory = activeCategory ? CATEGORIES[activeCategory] : undefined;
@@ -48,8 +53,13 @@ export default function PartsSelectionPage({ onPartsSelected, onBack }: PartsSel
           <button onClick={onBack} className="flex items-center gap-2 text-foreground hover:text-primary transition-colors font-medium text-sm">
             <ArrowLeft className="w-4 h-4" /> 홈으로
           </button>
-          <div className="bg-white/80 backdrop-blur px-3 py-1.5 rounded-full shadow-sm border border-purple-100 text-xs font-bold text-primary">
-            {selectedParts.length} / 2 선택됨
+          <div className="flex items-center gap-2">
+            <div className="bg-white/80 backdrop-blur px-3 py-1.5 rounded-full shadow-sm border border-purple-100 text-xs font-bold text-primary">
+              {selectedCountLabel}
+            </div>
+            <span className={`text-xs font-semibold ${isPremium ? 'text-secondary' : 'text-slate-500'}`}>
+              {isPremium ? '프리미엄 모드' : '무료 모드'}
+            </span>
           </div>
         </div>
 
@@ -117,13 +127,23 @@ export default function PartsSelectionPage({ onPartsSelected, onBack }: PartsSel
           </div>
         </div>
 
+        {error && (
+          <p className="w-full mt-3 text-sm text-red-500 bg-red-50 border border-red-100 rounded-xl px-3 py-2 text-center">
+            {error}
+          </p>
+        )}
+
         <div className="w-full mt-5">
           <Button
             onClick={handleGenerate}
-            disabled={selectedParts.length !== 2}
+            disabled={selectedParts.length !== 2 || isLoading}
             className="w-full py-5 text-base font-bold rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed bg-gradient-to-r from-primary to-orange-500 hover:shadow-lg transition-all"
           >
-            {selectedParts.length === 2 ? '캐릭터 생성하기 ✨' : `${2 - selectedParts.length}개 더 선택해주세요`}
+            {selectedParts.length === 2
+              ? isLoading
+                ? '마법을 부르는 중...'
+                : '캐릭터 생성하기 ✨'
+              : `${2 - selectedParts.length}개 더 선택해주세요`}
           </Button>
         </div>
       </div>

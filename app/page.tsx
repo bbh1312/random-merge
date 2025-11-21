@@ -1,58 +1,86 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import HomePage from '@/components/home-page';
 import PartsSelectionPage from '@/components/parts-selection-page';
-import ResultPage from '@/components/result-page';
+import ResultPage, { GeneratedCharacter } from '@/components/result-page';
 import CollectionPage from '@/components/collection-page';
 import SignupPage from '@/components/signup-page';
+import { apiGenerateCharacter, apiSaveCollectionItem, CollectionItem } from '@/lib/api-client';
+import { getDeviceId } from '@/lib/device-id';
 
 type PageType = 'home' | 'parts' | 'result' | 'collection' | 'signup';
-
-interface GeneratedCharacter {
-  name: string;
-  description: string;
-  imageUrl: string;
-  premium: boolean;
-  parts: string[];
-}
 
 export default function Page() {
   const [currentPage, setCurrentPage] = useState<PageType>('signup');
   const [isPremium, setIsPremium] = useState(false);
   const [generatedCharacter, setGeneratedCharacter] = useState<GeneratedCharacter | null>(null);
-  const [selectedParts, setSelectedParts] = useState<string[]>([]);
-  const [collection, setCollection] = useState<GeneratedCharacter[]>([]);
+  const [collection, setCollection] = useState<CollectionItem[]>([]);
   const [user, setUser] = useState<{ nickname: string } | null>(null);
+  const [deviceId, setDeviceId] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generateError, setGenerateError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+
+  useEffect(() => {
+    getDeviceId()
+      .then(setDeviceId)
+      .catch(() => setDeviceId(null));
+  }, []);
+
+  const ensureDeviceId = useCallback(async () => {
+    const id = deviceId ?? (await getDeviceId());
+    setDeviceId(id);
+    return id;
+  }, [deviceId]);
 
   const handleStartPull = (premium: boolean) => {
     setIsPremium(premium);
-    setSelectedParts([]);
+    setGeneratedCharacter(null);
+    setGenerateError(null);
     setCurrentPage('parts');
   };
 
-  const handlePartsSelected = (parts: string[]) => {
-    setSelectedParts(parts);
-    // Simulate API call to generate character
-    const mockCharacter: GeneratedCharacter = {
-      name: `${parts.join('')} 친구`,
-      description: `이것은 ${parts.join('과 ')}가 합쳐진 귀여운 캐릭터입니다. 매우 독특한 매력을 가지고 있어요!`,
-      imageUrl: '/cute-character-combination.jpg',
-      premium: isPremium,
-      parts: parts,
-    };
-    setGeneratedCharacter(mockCharacter);
-    setCurrentPage('result');
+  const handlePartsSelected = async (parts: string[]) => {
+    setIsGenerating(true);
+    setGenerateError(null);
+    try {
+      const id = await ensureDeviceId();
+      const character = await apiGenerateCharacter(parts, { premium: isPremium, deviceId: id });
+      setGeneratedCharacter({
+        ...character,
+        premium: character.premium ?? isPremium,
+        parts,
+      });
+      setCurrentPage('result');
+    } catch (err) {
+      console.error(err);
+      setGenerateError(err instanceof Error ? err.message : '캐릭터 생성 중 오류가 발생했어요.');
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
-  const handleSaveToCollection = () => {
-    if (generatedCharacter) {
-      setCollection([...collection, generatedCharacter]);
+  const handleSaveToCollection = async () => {
+    if (!generatedCharacter) return;
+    setIsSaving(true);
+    setSaveError(null);
+    try {
+      const id = await ensureDeviceId();
+      const { item } = await apiSaveCollectionItem(id, generatedCharacter, generatedCharacter.parts);
+      setCollection((prev) => [item, ...prev]);
+      setCurrentPage('home');
+    } catch (err) {
+      console.error(err);
+      setSaveError(err instanceof Error ? err.message : '도감 저장에 실패했어요.');
+    } finally {
+      setIsSaving(false);
     }
-    setCurrentPage('home');
   };
 
   const handleBackToHome = () => {
+    setGenerateError(null);
     setCurrentPage('home');
   };
 
@@ -70,7 +98,7 @@ export default function Page() {
           onViewCollection={() => setCurrentPage('collection')}
           onSignup={() => setCurrentPage('signup')}
           user={user}
-          recentCharacter={collection[collection.length - 1] || null}
+          recentCharacter={collection[0] || null}
           collectionCount={collection.length}
         />
       )}
@@ -85,6 +113,8 @@ export default function Page() {
           onPartsSelected={handlePartsSelected}
           onBack={handleBackToHome}
           isPremium={isPremium}
+          isLoading={isGenerating}
+          error={generateError}
         />
       )}
       {currentPage === 'result' && generatedCharacter && (
@@ -93,6 +123,8 @@ export default function Page() {
           onSaveToCollection={handleSaveToCollection}
           onViewCollection={() => setCurrentPage('collection')}
           onPullAgain={() => handleStartPull(isPremium)}
+          isSaving={isSaving}
+          error={saveError}
         />
       )}
       {currentPage === 'collection' && (

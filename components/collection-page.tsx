@@ -1,9 +1,10 @@
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { CollectionItem } from '@/lib/api-client';
 import { ArrowLeft, Star, Grid3x3 } from 'lucide-react';
 
 interface CollectionPageProps {
-  characters: any[];
+  characters: CollectionItem[];
   onBack: () => void;
 }
 
@@ -42,8 +43,8 @@ export default function CollectionPage({ characters, onBack }: CollectionPagePro
           </Card>
         ) : (
           <div className="space-y-4">
-            {characters.map((character, index) => (
-              <Card key={index} className="overflow-hidden bg-white">
+            {characters.map((character) => (
+              <Card key={character.id} className="overflow-hidden bg-white">
                 <div className="relative overflow-hidden bg-gradient-to-br from-primary/10 to-secondary/10">
                   <img src={character.imageUrl || "/placeholder.svg"} alt={character.name} className="w-full h-48 object-cover" />
                   {character.premium && (
