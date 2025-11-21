@@ -30,6 +30,13 @@ export interface CollectionItem {
   createdAt: string;
 }
 
+export interface UserProfile {
+  deviceId: string;
+  nickname: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
@@ -66,5 +73,16 @@ export async function apiSaveCollectionItem(
   return request<{ item: CollectionItem; slots: SlotsResponse }>("/collection", {
     method: "POST",
     body: JSON.stringify({ deviceId, character, parts }),
+  });
+}
+
+export async function apiGetUserProfile(deviceId: string) {
+  return request<UserProfile>(`/users/${encodeURIComponent(deviceId)}`);
+}
+
+export async function apiUpsertUserProfile(deviceId: string, nickname: string) {
+  return request<UserProfile>("/users", {
+    method: "POST",
+    body: JSON.stringify({ deviceId, nickname }),
   });
 }
