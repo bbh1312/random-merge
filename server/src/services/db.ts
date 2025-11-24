@@ -1,23 +1,20 @@
-import Database from "better-sqlite3";
-import fs from "node:fs";
-import path from "node:path";
+import "../config/env";
+import { Pool } from "pg";
 
-const defaultDbPath = path.resolve(__dirname, "../../data/app.db");
-const dbPath = process.env.DATABASE_PATH ? path.resolve(process.env.DATABASE_PATH) : defaultDbPath;
+const databaseUrl = process.env.DATABASE_URL;
 
-fs.mkdirSync(path.dirname(dbPath), { recursive: true });
+if (!databaseUrl) {
+  throw new Error("DATABASE_URL environment variable is required for the API server");
+}
 
-const db = new Database(dbPath);
+const sslValue = (process.env.DB_SSL ?? "").toLowerCase();
+const shouldUseSsl = sslValue === "true" || sslValue === "1";
 
-db.pragma("journal_mode = WAL");
-
-db.exec(`
-  CREATE TABLE IF NOT EXISTS users (
-    deviceId TEXT PRIMARY KEY,
-    nickname TEXT NOT NULL,
-    createdAt TEXT NOT NULL,
-    updatedAt TEXT NOT NULL
-  )
-`);
-
-export default db;
+export const pgPool = new Pool({
+  connectionString: databaseUrl,
+  ssl: shouldUseSsl
+    ? {
+        rejectUnauthorized: false,
+      }
+    : undefined,
+});

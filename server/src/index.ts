@@ -1,14 +1,12 @@
 
+import "./config/env";
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 import { generateCharacter } from "./generators/characterGenerator";
 import { canUsePremium, incrementPremiumUsage, getMaxDailyPremium, getPremiumUsage } from "./services/premiumUsageStore";
 import { addToCollection, getCollection, getCollectionCount } from "./services/collectionStore";
 import { claimSlots, getBaseSlots, getExtraSlots, getMaxSlots } from "./services/slotStore";
 import { getUserProfile, upsertUserProfile } from "./services/userStore";
-
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -20,19 +18,24 @@ app.get("/", (_req, res) => {
   res.send("Random Character API is running");
 });
 
-app.get("/users/:deviceId", (req, res) => {
+app.get("/users/:deviceId", async (req, res) => {
   const { deviceId } = req.params;
   if (!deviceId) {
     return res.status(400).json({ error: "deviceId is required" });
   }
-  const profile = getUserProfile(deviceId);
-  if (!profile) {
-    return res.status(404).json({ error: "USER_NOT_FOUND" });
+  try {
+    const profile = await getUserProfile(deviceId);
+    if (!profile) {
+      return res.status(404).json({ error: "USER_NOT_FOUND" });
+    }
+    return res.json(profile);
+  } catch (err) {
+    console.error("Error fetching user profile:", err);
+    return res.status(500).json({ error: "Failed to load user profile" });
   }
-  return res.json(profile);
 });
 
-app.post("/users", (req, res) => {
+app.post("/users", async (req, res) => {
   const { deviceId, nickname } = req.body;
   if (!deviceId || typeof deviceId !== "string") {
     return res.status(400).json({ error: "deviceId is required" });
@@ -44,8 +47,13 @@ app.post("/users", (req, res) => {
   if (!trimmedNickname) {
     return res.status(400).json({ error: "nickname cannot be empty" });
   }
-  const profile = upsertUserProfile(deviceId, trimmedNickname);
-  return res.json(profile);
+  try {
+    const profile = await upsertUserProfile(deviceId, trimmedNickname);
+    return res.json(profile);
+  } catch (err) {
+    console.error("Error saving user profile:", err);
+    return res.status(500).json({ error: "Failed to save user profile" });
+  }
 });
 
 app.get("/collection/slots", (req, res) => {
