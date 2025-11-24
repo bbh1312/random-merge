@@ -2,7 +2,7 @@ node_modules/
 .next/
 *.log
 .DS_Store
-.env
+#.env
 .expo/
 dist/
 build/
